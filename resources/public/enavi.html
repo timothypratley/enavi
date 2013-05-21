@@ -12,7 +12,22 @@
   </head>
 
   <body ng-controller="EnaviCtrl">
+    <!-- the main grid list of entities -->
     <div class="gridStyle" ng-grid="grid"></div>
-    <div class="selectedItems">{{selected}}</div>
+
+    <!-- the details of selected entities -->
+    <div class="selectedItems">
+      <div ng-repeat="entity in selected">
+        <div ng-switch="entity.type">
+          <div ng-switch-when="Move">
+            {{entity.ContainerNo}}
+            <ul ng-repeat="segment in entity.MoveSegments">
+              <li>{{segment}}</li>
+            </ul>
+          </div>
+          <div ng-switch-default>{{entity}}</div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

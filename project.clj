@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.5"]
-                 [hiccup "1.0.3"]]
+                 [hiccup "1.0.3"]
+                 [shoreleave/shoreleave-remote "0.3"]]
   :plugins [[lein-cljsbuild "0.3.2"]
             [lein-ring "0.8.5"]]
   :cljsbuild {
