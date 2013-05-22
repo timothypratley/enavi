@@ -1,9 +1,15 @@
 .gridStyle {
-    border: 1px solid rgb(212,212,212);
-    width: 400px;
-    height: 300px
+  float: left;
+  border: 1px solid rgb(212,212,212);
+  width: 70%;
+  height: 400px;
 }
 
-.selectedItems{
-    float: left;
+.selectedItems {
+  float: left;
+}
+
+.commands {
+  float: left;
+  width: 5%;
 }

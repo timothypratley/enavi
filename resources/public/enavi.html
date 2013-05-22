@@ -12,10 +12,26 @@
   </head>
 
   <body ng-controller="EnaviCtrl">
-    <!-- the main grid list of entities -->
+    <!-- search bar -->
+    <input type="text" ng-model="search">
+
+    <!-- the focal -->
+    <div class="focal">
+      <button type="button" ng-click="up()">up</button>
+      {{focal}}
+    </div>
+
+
+    <!-- commdands -->
+    <div class="commands">
+      {{commands}}
+    </div>
+
+    <!-- detail grid -->
     <div class="gridStyle" ng-grid="grid"></div>
 
-    <!-- the details of selected entities -->
+
+    <!-- related information when selected -->
     <div class="selectedItems">
       <div ng-repeat="entity in selected">
         <div ng-switch="entity.type">
@@ -25,7 +41,9 @@
               <li>{{segment}}</li>
             </ul>
           </div>
-          <div ng-switch-default>{{entity}}</div>
+          <div ng-switch-default>
+            {{entity.related}}
+          </div>
         </div>
       </div>
     </div>
