@@ -15,21 +15,21 @@
     <!-- search bar -->
     <input type="text" ng-model="search">
 
-    <!-- the focal -->
+    <!-- the focal layer, which we view the children of -->
     <div class="focal">
-      <button type="button" ng-click="up()">up</button>
-      {{focal}}
+      <h2>
+        <button type="button" ng-click="up()">up</button>
+        {{focal.Type}}: {{name(focal)}}
+      </h2>
     </div>
 
-
-    <!-- commdands -->
+    <!-- commands -->
     <div class="commands">
       {{commands}}
     </div>
 
     <!-- detail grid -->
     <div class="gridStyle" ng-grid="grid"></div>
-
 
     <!-- related information when selected -->
     <div class="selectedItems">
@@ -45,6 +45,7 @@
             {{entity.related}}
           </div>
         </div>
+        <button type="button" ng-click="down(entity)">down</button>
       </div>
     </div>
   </body>
