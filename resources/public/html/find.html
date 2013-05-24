@@ -1,0 +1,81 @@
+<!-- sidebar -->
+<div class="span2">
+  <ul class="nav nav-list">
+    <li class="nav-header">Default</li>
+    <li>
+      <a href="#">Zones</a>
+      <ul>
+        <li><a href="#">Vessel</a></li>
+        <li><a href="#">Rail</a></li>
+        <li><a href="#">Gate</a></li>
+        <li><a href="#">Yard</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#">Equipment</a>
+      <ul>
+        <li><a href="#">All</a></li>
+        <li><a href="#">UTRs</a></li>
+        <li><a href="#">RTGs</a></li>
+        <li><a href="#">WSCs</a></li>
+        <li><a href="#">TPs</a></li>
+        <li><a href="#">GCs</a></li>
+      </ul>
+    </li>
+    <li class="nav-header">Saved</li>
+    <li>
+      <ul>
+        <li><a href="#">Urgent Moves</a></li>
+        <li><a href="#">Unassigned Moves</a></li>
+        <li><a href="#">Shifts</a></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+
+<tabs class="tabs">
+  <pane ng-repeat="pane in panes" heading="{{pane.Type}} {{name(pane)}}" active="pane.active">
+    <!-- search bar -->
+    <form class="navbar-search">
+      <button type="button" ng-click="up()">&lt</button>
+      <input type="text" ng-model="grid.filterOptions.filterText" class="search-query span3" placeholder="Search">
+    </form>
+    <br>
+    <br>
+
+    <!-- detail grid -->
+    <div class="gridStyle" ng-grid="grid"></div>
+
+    <!-- related information when selected -->
+    <div class="selectedItems">
+      <!-- commands -->
+      <div class="commands">
+        <button type="button" ng-repeat="c in commands">{{c}}</button>
+      </div>
+
+      <div ng-repeat="entity in related">
+        <button type="button" ng-click="down(entity)">
+          <h2>{{name(entity)}}</h2>
+          <div ng-switch="entity.Type">
+            <div ng-switch-when="Move">
+              {{entity.FromLocation.Type}} {{entity.ToLocation.Type}} {{entity.size}}
+            </div>
+            <div ng-switch-when="Segment">
+              {{entity.ContainerNo}} {{entity.FromLocation.Type}} {{entity.ToLocation.Type}}
+            </div>
+            <div ng-switch-when="Equipment">
+              {{entity.EquipmentNo}}
+            </div>
+            <div ng-switch-when="Zone">
+              {{entity.Filter}}
+            </div>
+            <div ng-switch-default>
+              {{entity}}
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </pane>
+</tabs>

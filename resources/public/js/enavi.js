@@ -1,7 +1,17 @@
-angular.module("enavi", ["ngGrid"]);
+angular.module("enavi", ["ngGrid", "ui.bootstrap"])
+.config(function ($routeProvider, $httpProvider) {
+  $routeProvider
+  .when("/about", {templateUrl: "html/about.html"})
+  .when("/find", {templateUrl: "html/find.html", controller: FindCtrl})
+  .when("/view", {templateUrl: "html/view.html"})
+  .when("/apps", {templateUrl: "html/apps.html"})
+  .when("/reports", {templateUrl: "html/reports.html"})
+  .otherwise({redirectTo: "/about"});
+});
 
 var zoneEntities = [{Type: "Zone",
-                     Name: "All"}];
+                     Name: "All",
+                     Filter: "None"}];
 
 var moveEntities = [{Type: "Move",
                      ContainerNo: "TIMP1234567",
@@ -57,14 +67,18 @@ var segmentEntities = [{Type: "Segment",
                         Assigned: ["RTG2"],
                         Name: "Y"}];
 
-var equipmentEntities = [{Type: "Equipment", EquipmentNo: "RTG1"},
-                         {Type: "Equipment", EquipmentNo: "RTG2"},
-                         {Type: "Equipment", EquipmentNo: "UTR1"},
-                         {Type: "Equipment", EquipmentNo: "UTR2"}];
+var equipmentEntities = [{Type: "Equipment", EquipmentNo: "RTG1", EquipmentType: "RTG"},
+                         {Type: "Equipment", EquipmentNo: "RTG2", EquipmentType: "RTG"},
+                         {Type: "Equipment", EquipmentNo: "UTR1", EquipmentType: "UTR"},
+                         {Type: "Equipment", EquipmentNo: "UTR2", EquipmentType: "UTR"}];
 
 // do we want these?
 var hitchedRelations = {UTR1: "KBHU1234123"};
 var liftedRelations = {RTG2: "TRLU1234123"};
+
+var relations = function (entity) {
+
+};
 
 var children = function(entity) {
   if (entity.Type === "Zone") {
@@ -82,7 +96,7 @@ var children = function(entity) {
       return entity.Assigned.indexOf(e.EquipmentNo) !== -1;
     });
   }
-  return moveEntities;
+    return moveEntities;
 };
 
 var parent = function(entity) {
@@ -99,14 +113,14 @@ var parent = function(entity) {
   }
 };
 
-var getRelated = {
-  Move: function(move) {
-    move.related = {MoveSegments: ["C", "U", "Y"]};
-  },
-  Equipment: function(equipment) {
-    equipment.related = {MoveSegments: segmentEntities};
-  }
-};
+// var getRelated = {
+//   Move: function(move) {
+//     move.related = {MoveSegments: ["C", "U", "Y"]};
+//   },
+//   Equipment: function(equipment) {
+//     equipment.related = {MoveSegments: segmentEntities};
+//   }
+// };
 
 var getKeys = function(obj) {
   var keys = [];
@@ -118,40 +132,47 @@ var getKeys = function(obj) {
   return keys;
 };
 
-function EnaviCtrl($scope) {
+function FindCtrl($scope, $log) {
+  $scope.panes = [zoneEntities[0], moveEntities[0], equipmentEntities[0]];
+  zoneEntities[0].active = true;
+  $scope.history = [];
   $scope.commands = [];
-  $scope.selected = [];
   $scope.entities = [];
   $scope.columns = [];
+  $scope.related = [];
   $scope.grid = {data: "entities",
-                 selectedItems: $scope.selected,
+                 selectedItems: [],
                  keepLastSelected: true,
                  showGroupPanel: true,
-                 showFilter: true,
+                 //showFilter: true,
                  columnDefs: "columns",
+                 rowTemplate: '<accordion><div ng-dblclick="down(row.entity)" ng-init="" ng-style="{\'cursor\': row.cursor, \'z-index\': col.zIndex() }" ng-repeat="col in renderedColumns" ng-class="col.colIndex()" class="ngCell {{col.cellClass}}" ng-cell></div><accordion>',
+                 filterOptions: {filterText: ""}
                  //showColumnMenu: true,
                  //jqueryUIDraggable: true
                 };
 
   // retrieve related information when entities are selected
-  $scope.$watch('selected', function(newArray, oldArray) {
+  $scope.$watch('grid.selectedItems', function(newArray, oldArray) {
     var added = newArray.filter(function(item) {
       return oldArray.indexOf(item) === -1;
     });
-    angular.forEach(added, function(e) {
-      e.related = children(e);
-    });
-    $scope.commands = added.length > 0 ? ["hold"] : [];
+    $scope.related = added.map(function(e) {
+      return children(e);
+    }).reduce(function(a, e) {
+      return a.concat(e);
+    }, []);
+    $scope.commands = added.length > 0 ? ["hold", "hitch", "release"] : [];
   }, true);
 
   // navigating to new layers
   $scope.focus = function(focal) {
     var fields;
     $scope.focal = focal;
-    $scope.selected.length = 0;  // TODO: this doesn't unselect though
+    $scope.grid.selectedItems.length = 0;  // TODO: this doesn't unselect though
     $scope.entities = children(focal);
     fields = getKeys($scope.entities[0]).filter(function(c) {
-      return c !== "Type" && c !== "previous" && c !== "related" && c !== "$$hashKey";
+      return c !== "Type" && c !== "$$hashKey";
     });
     $scope.columns = fields.map(function(f) {
       return {field: f};
@@ -160,13 +181,13 @@ function EnaviCtrl($scope) {
   $scope.focus(zoneEntities[0]);
 
   $scope.down = function(entity) {
-    entity.previous = $scope.focal;
+    $scope.history.push($scope.focal);
     $scope.focus(entity);
   };
 
   $scope.up = function() {
-    if ($scope.focal.previous) {
-      $scope.focus($scope.focal.previous);
+    if ($scope.history.length > 0) {
+      $scope.focus($scope.history.pop());
     }
   };
 
@@ -174,7 +195,7 @@ function EnaviCtrl($scope) {
     if (entity.Type === "Move") {
       return entity.ContainerNo;
     } else if (entity.Type === "Segment") {
-      return entity.ContainerNo;
+      return entity.Name;
     } else if (entity.Type === "Equipment") {
       return entity.EquipmentNo;
     } else if (entity.Type === "Zone") {
